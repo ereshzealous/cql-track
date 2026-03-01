@@ -245,9 +245,17 @@ docker run --rm -v $(pwd)/migrations:/workspace/migrations \
 - Apache Cassandra 3.x / 4.x / 5.x, or DataStax Astra DB
 - Dependencies: `cassandra-driver`, `click`, `pyyaml`
 
+## Examples
+
+See the [`examples/migrations/`](examples/migrations/) directory for sample migration files demonstrating table creation, schema alterations, and rollback patterns.
+
 ## Documentation
 
 See [USAGE.md](USAGE.md) for the complete guide — configuration reference, all commands with examples, SSL/TLS setup, Astra DB, distributed locking internals, partial failure handling, schema agreement, adoption workflow, lint rules, and troubleshooting.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing, and how to submit changes.
 
 ## License
 

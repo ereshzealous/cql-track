@@ -6,8 +6,25 @@ build-backend = "setuptools.build_meta"
 name = "cql-track"
 version = "0.1.0"
 description = "Schema migration tool for Apache Cassandra"
+readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
+authors = [
+    { name = "Eresh Gorantla", email = "eresh.zealous@gmail.com" },
+]
+keywords = ["cassandra", "cql", "migration", "schema", "database", "devops"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Database",
+    "Topic :: Software Development :: Libraries",
+    "Environment :: Console",
+]
 dependencies = [
     "cassandra-driver>=3.28",
     "click>=8.0",
@@ -18,6 +35,12 @@ dependencies = [
 dev = [
     "pytest>=7.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/ereshzealous/cql-track"
+Repository = "https://github.com/ereshzealous/cql-track"
+Issues = "https://github.com/ereshzealous/cql-track/issues"
+Changelog = "https://github.com/ereshzealous/cql-track/blob/main/CHANGELOG.md"
 
 [project.scripts]
 cqltrack = "cqltrack.cli:main"
