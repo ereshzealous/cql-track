@@ -1,0 +1,111 @@
+# cqltrack configuration
+#
+# Resolution order (last wins):
+#   1. defaults
+#   2. top-level values below
+#   3. profile overrides (--profile dev)
+#   4. CQLTRACK_* environment variables
+#   5. CLI flags (--keyspace, --host, --port)
+
+cassandra:
+  contact_points:
+    - 127.0.0.1
+  port: 9042
+  auth:
+    username:
+    password:
+
+  # consistency level for reads/writes during migration
+  # valid: ANY, ONE, TWO, THREE, QUORUM, ALL,
+  #        LOCAL_ONE, LOCAL_QUORUM, EACH_QUORUM
+  # note: the distributed lock always uses SERIAL consistency
+  #       regardless of this setting (that's how LWT works)
+  consistency: LOCAL_ONE
+
+  # timeouts in seconds
+  connect_timeout: 10
+  request_timeout: 30
+
+  # SSL/TLS — uncomment to enable
+  # ssl:
+  #   enabled: true
+  #   ca_certs: /path/to/ca.crt
+  #   certfile: /path/to/client.crt    # for mutual TLS
+  #   keyfile: /path/to/client.key
+  #   verify: true
+
+  # DataStax Astra DB — set this and skip contact_points/port/ssl
+  # secure_connect_bundle: /path/to/secure-connect-mydb.zip
+
+keyspace:
+  name: my_app
+
+  # supports any Cassandra replication strategy:
+  #
+  # SimpleStrategy (dev / single-dc):
+  #   replication:
+  #     class: SimpleStrategy
+  #     replication_factor: 1
+  #
+  # NetworkTopologyStrategy (production / multi-dc):
+  #   replication:
+  #     class: NetworkTopologyStrategy
+  #     dc1: 3
+  #     dc2: 2
+  replication:
+    class: SimpleStrategy
+    replication_factor: 1
+
+migrations:
+  directory: migrations
+
+lock:
+  ttl: 600  # seconds before a stale lock auto-expires
+
+schema:
+  agreement_wait: 30  # max seconds to wait for all nodes to agree after DDL
+
+# ---- environment profiles --------------------------------------------------
+# each profile can override any of the sections above.
+# use with: cqltrack --profile staging migrate
+
+profiles:
+  dev:
+    cassandra:
+      contact_points:
+        - 127.0.0.1
+      consistency: LOCAL_ONE
+    keyspace:
+      name: myapp_dev
+      replication:
+        class: SimpleStrategy
+        replication_factor: 1
+
+  staging:
+    cassandra:
+      contact_points:
+        - 10.0.1.1
+        - 10.0.1.2
+      consistency: LOCAL_QUORUM
+    keyspace:
+      name: myapp_staging
+      replication:
+        class: NetworkTopologyStrategy
+        dc1: 2
+
+  prod:
+    cassandra:
+      contact_points:
+        - 10.0.2.1
+        - 10.0.2.2
+        - 10.0.2.3
+      consistency: LOCAL_QUORUM
+      auth:
+        username: cqltrack_svc
+        password: "${CQLTRACK_PASSWORD}"
+    keyspace:
+      name: myapp_prod
+      replication:
+        class: NetworkTopologyStrategy
+        dc1: 3
+        dc2: 3
