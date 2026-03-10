@@ -1,5 +1,8 @@
 # CQLTrack - A Cassandra Based Schema Versioning Tool
 
+[![CI](https://github.com/ereshzealous/cql-track/actions/workflows/ci.yml/badge.svg)](https://github.com/ereshzealous/cql-track/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Schema migration tool for Apache Cassandra.
 
 Version-controlled `.cql` files, distributed locking, checksum validation, multi-environment profiles, static analysis, and schema diffing — built on the DataStax Python driver.
