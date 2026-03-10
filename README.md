@@ -1,4 +1,4 @@
-# cqltrack
+# CQLTrack - A Cassandra Based Schema Versioning Tool
 
 Schema migration tool for Apache Cassandra.
 
