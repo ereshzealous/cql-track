@@ -1,3 +1,4 @@
+import logging
 import os
 import socket
 import time
@@ -20,12 +21,15 @@ _DDL_KEYWORDS = ("CREATE", "ALTER", "DROP", "TRUNCATE")
 FAILED_STATUS = "failed"
 APPLIED_STATUS = "applied"
 
+_log = logging.getLogger("cqltrack")
+
 
 class Migrator:
 
-    def __init__(self, session, config):
+    def __init__(self, session, config, log=None):
         self.session = session
         self.config = config
+        self._log = log or _log
 
     # -- bootstrap -----------------------------------------------------------
 
@@ -93,13 +97,13 @@ class Migrator:
             pending = [m for m in pending if m.version <= target]
 
         if not pending:
-            click.echo("Nothing to migrate. Already up to date.")
+            self._emit("Nothing to migrate. Already up to date.")
             return []
 
         if dry_run:
-            click.echo("Dry run - would apply:")
+            self._emit("Dry run - would apply:")
             for m in pending:
-                click.echo(f"  V{m.version:03d}  {m.description}")
+                self._emit(f"  V{m.version:03d}  {m.description}")
             return pending
 
         applied = []
@@ -115,7 +119,7 @@ class Migrator:
         """Undo the N most recently applied migrations."""
         applied = self.get_applied()
         if not applied:
-            click.echo("Nothing to roll back.")
+            self._emit("Nothing to roll back.")
             return []
 
         on_disk = scan_directory(self.config.migration_dir)
@@ -167,7 +171,7 @@ class Migrator:
                     0,
                 ),
             )
-            click.echo(f"  Baselined V{m.version:03d}  {m.description}")
+            self._emit(f"  Baselined V{m.version:03d}  {m.description}")
             count += 1
 
         return count
@@ -199,7 +203,7 @@ class Migrator:
                     f"UPDATE {HISTORY_TABLE} SET checksum = %s WHERE version = %s",
                     (m.checksum, m.version),
                 )
-                click.echo(f"  Updated checksum for V{m.version:03d}")
+                self._emit(f"  Updated checksum for V{m.version:03d}")
                 fixed += 1
         return fixed
 
@@ -223,10 +227,9 @@ class Migrator:
             if self._schemas_agree():
                 return
             time.sleep(0.5)
-        click.echo(
-            "WARNING: schema agreement not reached within "
-            f"{self.config.schema_agreement_wait}s — proceeding anyway",
-            err=True,
+        self._log.warning(
+            "Schema agreement not reached within %ds — proceeding anyway",
+            self.config.schema_agreement_wait,
         )
 
     def _schemas_agree(self):
@@ -253,7 +256,7 @@ class Migrator:
             )
 
     def _apply_one(self, migration):
-        click.echo(
+        self._emit(
             f"Applying V{migration.version:03d}  {migration.description} ... ",
             nl=False,
         )
@@ -266,7 +269,7 @@ class Migrator:
                 if _is_ddl(stmt):
                     self._wait_for_schema_agreement()
         except Exception as exc:
-            click.echo("FAILED")
+            self._emit("FAILED")
             elapsed_ms = int((time.time() - t0) * 1000)
             # record the failure so we know this version is in a broken state
             self._record_migration(migration, elapsed_ms, FAILED_STATUS)
@@ -278,7 +281,7 @@ class Migrator:
 
         elapsed_ms = int((time.time() - t0) * 1000)
         self._record_migration(migration, elapsed_ms, APPLIED_STATUS)
-        click.echo(f"OK ({elapsed_ms}ms)")
+        self._emit(f"OK ({elapsed_ms}ms)")
 
     def _record_migration(self, migration, elapsed_ms, status):
         self.session.execute(
@@ -297,7 +300,7 @@ class Migrator:
         )
 
     def _rollback_one(self, migration):
-        click.echo(
+        self._emit(
             f"Rolling back V{migration.version:03d}  {migration.description} ... ",
             nl=False,
         )
@@ -308,7 +311,7 @@ class Migrator:
                 if _is_ddl(stmt):
                     self._wait_for_schema_agreement()
         except Exception as exc:
-            click.echo("FAILED")
+            self._emit("FAILED")
             raise MigrationError(
                 f"Rollback V{migration.version:03d} failed: {exc}"
             ) from exc
@@ -318,7 +321,15 @@ class Migrator:
             (migration.version,),
         )
         elapsed_ms = int((time.time() - t0) * 1000)
-        click.echo(f"OK ({elapsed_ms}ms)")
+        self._emit(f"OK ({elapsed_ms}ms)")
+
+    def _emit(self, msg, nl=True):
+        """Output a message via click (CLI) or logging (programmatic)."""
+        try:
+            click.echo(msg, nl=nl)
+        except RuntimeError:
+            # no click context (programmatic usage)
+            self._log.info(msg.rstrip() if isinstance(msg, str) else msg)
 
 
 # ---------------------------------------------------------------------------
