@@ -502,9 +502,9 @@ Output:
 ```
 Keyspace: my_app
 
-  V001  OK  create users table        2026-03-01 08:08:52    275ms  ereshg@MacBook-Pro.local
-  V002  OK  create orders table       2026-03-01 08:08:52    134ms  ereshg@MacBook-Pro.local
-  V003  OK  add phone to users        2026-03-01 08:08:52     94ms  ereshg@MacBook-Pro.local
+  V001  OK  create users table        2026-03-01 08:08:52    275ms  user@hostname
+  V002  OK  create orders table       2026-03-01 08:08:52    134ms  user@hostname
+  V003  OK  add phone to users        2026-03-01 08:08:52     94ms  user@hostname
 ```
 
 Failed migrations show with a `FAILED` marker in red.
@@ -670,7 +670,7 @@ The `--json` flag is a **global** option — it goes before the command name.
     "description": "create users table",
     "status": "applied",
     "applied_at": "2026-03-01T08:08:52.028000",
-    "applied_by": "ereshg@MacBook-Pro.local"
+    "applied_by": "user@hostname"
   }
 ]
 ```
@@ -685,7 +685,7 @@ The `--json` flag is a **global** option — it goes before the command name.
     "status": "applied",
     "checksum": "25c5263a77a0c19cac6a2f92167dca3e",
     "applied_at": "2026-03-01T08:08:52.028000",
-    "applied_by": "ereshg@MacBook-Pro.local",
+    "applied_by": "user@hostname",
     "exec_time_ms": 275
   }
 ]

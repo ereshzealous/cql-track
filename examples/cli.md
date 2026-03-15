@@ -111,9 +111,9 @@ cqltrack history
 ```
 Keyspace: my_app
 
-  V001  OK  create users table        2026-03-10 19:20:06    275ms  ereshg@MacBook-Pro.local
-  V002  OK  create orders table       2026-03-10 19:20:07    132ms  ereshg@MacBook-Pro.local
-  V003  OK  add phone to users        2026-03-10 19:20:07    105ms  ereshg@MacBook-Pro.local
+  V001  OK  create users table        2026-03-10 19:20:06    275ms  user@hostname
+  V002  OK  create orders table       2026-03-10 19:20:07    132ms  user@hostname
+  V003  OK  add phone to users        2026-03-10 19:20:07    105ms  user@hostname
 ```
 
 ## Rollback
