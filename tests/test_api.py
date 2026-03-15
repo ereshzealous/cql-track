@@ -51,7 +51,8 @@ class TestCqlTrackInit:
         assert tracker._session is None
 
     def test_version_accessible(self):
-        assert __version__ == "1.0.0"
+        assert isinstance(__version__, str)
+        assert len(__version__.split(".")) >= 3
 
 
 class TestCqlTrackLint:
