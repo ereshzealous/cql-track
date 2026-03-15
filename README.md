@@ -1,11 +1,52 @@
 # CQLTrack - A Cassandra Based Schema Versioning Tool
 
 [![CI](https://github.com/ereshzealous/cql-track/actions/workflows/ci.yml/badge.svg)](https://github.com/ereshzealous/cql-track/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/cql-track)](https://pypi.org/project/cql-track/)
+[![Python](https://img.shields.io/pypi/pyversions/cql-track)](https://pypi.org/project/cql-track/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Schema migration tool for Apache Cassandra.
 
 Version-controlled `.cql` files, distributed locking, checksum validation, multi-environment profiles, static analysis, and schema diffing — built on the DataStax Python driver.
+
+> **Compatibility:** Verified with **Apache Cassandra** (3.x / 4.x / 5.x) and **DataStax Enterprise / Astra DB**. AWS Keyspaces is **not supported** at this time due to differences in LWT, schema agreement, and authentication mechanisms.
+
+## Installation
+
+### PyPI (recommended)
+
+```bash
+pip install cql-track
+```
+
+### CLI
+
+Once installed, the `cqltrack` command is available globally:
+
+```bash
+cqltrack --help
+```
+
+### Docker
+
+```bash
+# start local Cassandra
+docker compose up -d
+
+# run cqltrack in a container
+docker build -t cqltrack .
+docker run --rm -v $(pwd)/migrations:/workspace/migrations \
+  -v $(pwd)/cqltrack.yml:/workspace/cqltrack.yml \
+  --network host cqltrack migrate
+```
+
+### From source
+
+```bash
+git clone https://github.com/ereshzealous/cql-track.git
+cd cql-track
+pip install -e .
+```
 
 ## Why cqltrack?
 
@@ -32,6 +73,7 @@ Most migration tools target relational databases. Cassandra is different — DDL
 | **CI/CD Ready** | `pending` command as a deploy gate, JSON output, exit codes |
 | **SSL/TLS** | Full TLS support including mutual TLS with client certificates |
 | **Astra DB** | Secure connect bundle support for DataStax Astra |
+| **Programmatic API** | Use in FastAPI, Django, or plain Python at app startup |
 
 ## Quick Start
 
@@ -85,6 +127,26 @@ cqltrack migrate
 # check status
 cqltrack status
 ```
+
+## Programmatic API
+
+Use cqltrack as a library in your Python applications:
+
+```python
+from cqltrack import CqlTrack
+
+# with YAML config
+with CqlTrack("cqltrack.yml") as t:
+    t.init()
+    t.migrate()
+    print(t.status())
+
+# inline config (no YAML file needed)
+with CqlTrack(contact_points=["127.0.0.1"], keyspace="my_app") as t:
+    t.migrate()
+```
+
+See [examples/](examples/) for FastAPI, Django, and plain Python integration guides.
 
 ## Commands
 
@@ -229,28 +291,22 @@ cqltrack --json lint
 cqltrack --json diff --target-keyspace other_ks
 ```
 
-## Docker
-
-```bash
-# local Cassandra
-docker compose up -d
-
-# run cqltrack in a container
-docker build -t cqltrack .
-docker run --rm -v $(pwd)/migrations:/workspace/migrations \
-  -v $(pwd)/cqltrack.yml:/workspace/cqltrack.yml \
-  --network host cqltrack migrate
-```
-
 ## Requirements
 
 - Python 3.9+
-- Apache Cassandra 3.x / 4.x / 5.x, or DataStax Astra DB
+- Apache Cassandra 3.x / 4.x / 5.x, or DataStax Enterprise / Astra DB
 - Dependencies: `cassandra-driver`, `click`, `pyyaml`
 
 ## Examples
 
-See the [`examples/migrations/`](examples/migrations/) directory for sample migration files demonstrating table creation, schema alterations, and rollback patterns.
+See the [`examples/`](examples/) directory for integration guides:
+
+- [CLI usage](examples/cli.md) — full command reference with examples
+- [Plain Python](examples/plain-python.md) — programmatic API, context managers, error handling
+- [FastAPI](examples/fastapi.md) — lifespan pattern, migration status endpoint
+- [Django](examples/django.md) — AppConfig.ready(), management commands
+
+Sample migration files are in [`examples/migrations/`](examples/migrations/).
 
 ## Documentation
 
